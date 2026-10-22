@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Git Chaos</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>🌀 Git Chaos</h1>
+    <p>Eine Seite. Viele Köche. Keine Absprache.</p>
+  </header>
+
+  <main>
+    <!-- Klick-Zähler -->
+    <section class="card">
+      <h2>Klick-Zähler</h2>
+      <p class="counter" id="counter">0</p>
+      <button id="counter-btn">Klick mich!</button>
+    </section>
+
+    <!-- Todo-Liste -->
+    <section class="card">
+      <h2>Todo-Liste</h2>
+      <form id="todo-form">
+        <input id="todo-input" type="text" placeholder="Was ist zu tun?" autocomplete="off">
+        <button type="submit">+</button>
+      </form>
+      <ul id="todo-list"></ul>
+    </section>
+
+    <!-- Zufallsspruch -->
+    <section class="card">
+      <h2>Spruch des Moments</h2>
+      <p id="quote">„Funktioniert auf meinem Rechner.“</p>
+      <button id="quote-btn">Neuer Spruch</button>
+    </section>
+  </main>
+
+  <footer>
+    <h2>Wer war hier?</h2>
+    <!-- Trag dich hier ein! Eine Zeile pro Person. -->
+    <ul id="guestbook">
+      <li>Ben – hat das Chaos gestartet</li>
+    </ul>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
