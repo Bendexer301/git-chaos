@@ -92,3 +92,7 @@ footer {
   margin: 0 auto 2rem;
   padding: 0 1rem;
 }
+
+.trans {
+  background-image: url(trans.jpg);
+}
