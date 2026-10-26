@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="de" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ad Banner Widget</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              twitta: '#1DA1F2',
+              opensummary: '#6366F1',
+              codeclub: '#10B981',
+            }
+          },
+          animation: {
+            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+          }
+        }
+      }
+    }
+  </script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Custom CSS for smooth 3D carousel effect */
+    .carousel-container {
+      perspective: 1000px;
+    }
+    .ad-card {
+      transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+      transform-style: preserve-3d;
+    }
+    .ad-card.active {
+      opacity: 1;
+      transform: translateX(0) scale(1) rotateY(0deg);
+      z-index: 20;
+      pointer-events: auto;
+    }
+    .ad-card.prev {
+      opacity: 0.4;
+      transform: translateX(-60%) scale(0.85) rotateY(15deg);
+      z-index: 10;
+      pointer-events: none;
+    }
+    .ad-card.next {
+      opacity: 0.4;
+      transform: translateX(60%) scale(0.85) rotateY(-15deg);
+      z-index: 10;
+      pointer-events: none;
+    }
+    .ad-card.hidden-card {
+      opacity: 0;
+      transform: scale(0.7);
+      z-index: 0;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between p-4 font-sans antialiased">
+
+  <!-- Header / Demo Bar -->
+  <header class="max-w-xl mx-auto w-full flex items-center justify-between py-2 px-4 bg-slate-800/80 backdrop-blur rounded-full border border-slate-700/50 mb-4 shadow-lg">
+    <div class="flex items-center gap-2">
+      <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
+      <span class="text-xs font-semibold uppercase tracking-wider text-slate-300">Ad Widget Live Demo</span>
+    </div>
+    <div class="flex items-center gap-3">
+      <!-- Dark/Light Mode Switcher -->
+      <button id="themeToggle" class="text-slate-400 hover:text-amber-400 transition-colors p-1" title="Theme umschalten">
+        <i class="fa-solid fa-sun text-sm" id="themeIcon"></i>
+      </button>
+      <span class="text-xs text-slate-500">|</span>
+      <span class="text-xs bg-slate-700 text-slate-300 px-2 py-0.5 rounded-full">Auto-Rotate: 4s</span>
+    </div>
+  </header>
+
+  <!-- WIDGET WRAPPER MAIN -->
+  <main class="w-full max-w-lg mx-auto my-auto">
+    <div 
+      id="adWidget" 
+      class="relative bg-slate-800/90 dark:bg-slate-800/90 border border-slate-700/80 rounded-2xl p-5 shadow-2xl overflow-hidden group backdrop-blur-md transition-all duration-300"
+    >
+      
+      <!-- Sponsor Badge Header -->
+      <div class="flex items-center justify-between mb-4">
+        <span class="text-[10px] font-bold tracking-widest text-slate-400 uppercase bg-slate-700/50 px-2.5 py-1 rounded-md border border-slate-600/30">
+          <i class="fa-solid fa-rectangle-ad mr-1 text-indigo-400"></i> Anzeige / Sponsor
+        </span>
+        <div class="flex items-center gap-1">
+          <!-- Countdown Bar Indicator -->
+          <div class="w-16 h-1.5 bg-slate-700 rounded-full overflow-hidden">
+            <div id="progressBar" class="h-full bg-indigo-500 w-0 transition-all duration-100 ease-linear"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3D Carousel Container -->
+      <div id="carousel" class="carousel-container relative h-56 w-full flex items-center justify-center">
+
+        <!-- CARD 1: Twitta -->
+        <div data-index="0" class="ad-card active absolute inset-0 w-full h-full bg-gradient-to-br from-slate-800 to-sky-950/80 rounded-xl border border-sky-500/30 p-5 flex flex-col justify-between shadow-lg shadow-sky-500/10 hover:border-sky-400/60 transition-all">
+          <div class="flex justify-between items-start">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-xl bg-sky-500/20 border border-sky-400/40 flex items-center justify-center text-sky-400 text-2xl shadow-inner">
+                <i class="fa-brands fa-twitter"></i>
+              </div>
+              <div>
+                <h3 class="font-bold text-lg text-white leading-tight">Twitta</h3>
+                <p class="text-xs text-sky-300/80">Social Media Plattform</p>
+              </div>
+            </div>
+            <span class="inline-flex items-center text-[10px] font-medium bg-sky-500/20 text-sky-300 px-2 py-0.5 rounded-full border border-sky-500/30">
+              Community
+            </span>
+          </div>
+
+          <p class="text-sm text-slate-300 my-2 line-clamp-2">
+            Vernetze dich sofort auf Twitta. Melde dich an und teile deine Gedanken mit Freunden und der Community!
+          </p>
+
+          <a 
+            href="https://osiweb.de/websites/Twitta/login/login.php?m=login" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            class="w-full bg-sky-500 hover:bg-sky-400 text-white font-semibold py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 transition-all transform active:scale-95 shadow-md shadow-sky-500/20"
+          >
+            <span>Jetzt Anmelden</span>
+            <i class="fa-solid fa-arrow-right text-xs"></i>
+          </a>
+        </div>
+
+        <!-- CARD 2: OpenSummary -->
+        <div data-index="1" class="ad-card next absolute inset-0 w-full h-full bg-gradient-to-br from-slate-800 to-indigo-950/80 rounded-xl border border-indigo-500/30 p-5 flex flex-col justify-between shadow-lg shadow-indigo-500/10 hover:border-indigo-400/60 transition-all">
+          <div class="flex justify-between items-start">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-xl bg-indigo-500/20 border border-indigo-400/40 flex items-center justify-center text-indigo-400 text-2xl shadow-inner">
+                <i class="fa-solid fa-bolt"></i>
+              </div>
+              <div>
+                <h3 class="font-bold text-lg text-white leading-tight">OpenSummary</h3>
+                <p class="text-xs text-indigo-300/80">Smart Text & AI Tools</p>
+              </div>
+            </div>
+            <span class="inline-flex items-center text-[10px] font-medium bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-full border border-indigo-500/30">
+              Web App
+            </span>
+          </div>
+
+          <p class="text-sm text-slate-300 my-2 line-clamp-2">
+            Fasse lange Texte, Webseiten und Dokumente im Handumdrehen zusammen. Spare wertvolle Zeit!
+          </p>
+
+          <a 
+            href="https://opensummary.app" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 transition-all transform active:scale-95 shadow-md shadow-indigo-500/20"
+          >
+            <span>Website besuchen</span>
+            <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+          </a>
+        </div>
+
+        <!-- CARD 3: Code Club MG -->
+        <div data-index="2" class="ad-card prev absolute inset-0 w-full h-full bg-gradient-to-br from-slate-800 to-emerald-950/80 rounded-xl border border-emerald-500/30 p-5 flex flex-col justify-between shadow-lg shadow-emerald-500/10 hover:border-emerald-400/60 transition-all">
+          <div class="flex justify-between items-start">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-emerald-400 text-2xl shadow-inner">
+                <i class="fa-solid fa-code"></i>
+              </div>
+              <div>
+                <h3 class="font-bold text-lg text-white leading-tight">Code Club MG</h3>
+                <p class="text-xs text-emerald-300/80">Programmier-Community</p>
+              </div>
+            </div>
+            <span class="inline-flex items-center text-[10px] font-medium bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-500/30">
+              Lokal / Tech
+            </span>
+          </div>
+
+          <p class="text-sm text-slate-300 my-2 line-clamp-2">
+            Tritt dem Code Club Mönchengladbach bei! Lerne neue Tech-Skills, baue Projekte und treffe Entwickler.
+          </p>
+
+          <a 
+            href="https://codeclubmg.de" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 transition-all transform active:scale-95 shadow-md shadow-emerald-500/20"
+          >
+            <span>Mehr erfahren</span>
+            <i class="fa-solid fa-arrow-right text-xs"></i>
+          </a>
+        </div>
+
+      </div>
+
+      <!-- Controls & Indicators -->
+      <div class="flex items-center justify-between mt-4 pt-3 border-t border-slate-700/50">
+        
+        <!-- Prev Button -->
+        <button id="prevBtn" class="w-8 h-8 rounded-full bg-slate-700/60 hover:bg-slate-600 text-slate-300 hover:text-white flex items-center justify-center transition-all focus:outline-none">
+          <i class="fa-solid fa-chevron-left text-xs"></i>
+        </button>
+
+        <!-- Indicators -->
+        <div class="flex items-center gap-2" id="indicators">
+          <button data-slide="0" class="indicator-dot w-2.5 h-2.5 rounded-full bg-indigo-500 transition-all"></button>
+          <button data-slide="1" class="indicator-dot w-2.5 h-2.5 rounded-full bg-slate-600 transition-all"></button>
+          <button data-slide="2" class="indicator-dot w-2.5 h-2.5 rounded-full bg-slate-600 transition-all"></button>
+        </div>
+
+        <!-- Next Button -->
+        <button id="nextBtn" class="w-8 h-8 rounded-full bg-slate-700/60 hover:bg-slate-600 text-slate-300 hover:text-white flex items-center justify-center transition-all focus:outline-none">
+          <i class="fa-solid fa-chevron-right text-xs"></i>
+        </button>
+
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Embed Code Generator Section -->
+  <footer class="max-w-xl mx-auto w-full mt-6 bg-slate-800/60 border border-slate-700/60 rounded-xl p-4 text-xs text-slate-400">
+    <div class="flex items-center justify-between mb-2">
+      <span class="font-semibold text-slate-200"><i class="fa-solid fa-code text-indigo-400 mr-1"></i> Widget auf deiner Website einbinden:</span>
+      <button id="copyEmbedBtn" class="text-indigo-400 hover:text-indigo-300 font-medium transition-colors flex items-center gap-1">
+        <i class="fa-regular fa-copy"></i> Code kopieren
+      </button>
+    </div>
+    <div class="bg-slate-900/90 p-2.5 rounded-lg border border-slate-700/80 font-mono text-[11px] text-slate-300 overflow-x-auto select-all">
+      &lt;iframe src="pfad/zu/deinem/ad_widget.html" width="100%" height="340" frameborder="0" scrolling="no" style="border:none; overflow:hidden;"&gt;&lt;/iframe&gt;
+    </div>
+  </footer>
+
+  <!-- Toast Message -->
+  <div id="toast" class="fixed bottom-4 right-4 bg-indigo-600 text-white px-4 py-2 rounded-lg shadow-xl text-xs font-semibold opacity-0 pointer-events-none transition-all duration-300 transform translate-y-2">
+    In die Zwischenablage kopiert!
+  </div>
+
+  <!-- JavaScript Logic -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const cards = Array.from(document.querySelectorAll('.ad-card'));
+      const dots = Array.from(document.querySelectorAll('.indicator-dot'));
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      const progressBar = document.getElementById('progressBar');
+      const widget = document.getElementById('adWidget');
+      const themeToggle = document.getElementById('themeToggle');
+      const themeIcon = document.getElementById('themeIcon');
+
+      let currentIndex = 0;
+      const totalSlides = cards.length;
+      const rotateInterval = 4000; // 4 Sekunden
+      let timer = null;
+      let progressTimer = null;
+      let startTime = 0;
+      let isHovered = false;
+
+      // Theme Switcher Logic
+      let isDark = true;
+      themeToggle.addEventListener('click', () => {
+        isDark = !isDark;
+        if (isDark) {
+          document.documentElement.classList.add('dark');
+          themeIcon.className = 'fa-solid fa-sun text-sm';
+          widget.classList.replace('bg-slate-100', 'bg-slate-800/90');
+        } else {
+          document.documentElement.classList.remove('dark');
+          themeIcon.className = 'fa-solid fa-moon text-sm';
+          widget.classList.replace('bg-slate-800/90', 'bg-slate-100');
+        }
+      });
+
+      // Update Carousel Visuals
+      function updateCarousel(newIndex) {
+        currentIndex = (newIndex + totalSlides) % totalSlides;
+
+        cards.forEach((card, i) => {
+          card.classList.remove('active', 'prev', 'next', 'hidden-card');
+
+          if (i === currentIndex) {
+            card.classList.add('active');
+          } else if (i === (currentIndex - 1 + totalSlides) % totalSlides) {
+            card.classList.add('prev');
+          } else if (i === (currentIndex + 1) % totalSlides) {
+            card.classList.add('next');
+          } else {
+            card.classList.add('hidden-card');
+          }
+        });
+
+        // Update Indicators
+        dots.forEach((dot, i) => {
+          if (i === currentIndex) {
+            dot.className = 'indicator-dot w-5 h-2.5 rounded-full bg-indigo-500 transition-all';
+          } else {
+            dot.className = 'indicator-dot w-2.5 h-2.5 rounded-full bg-slate-600 transition-all';
+          }
+        });
+
+        resetProgress();
+      }
+
+      // Progress Bar Animation
+      function startProgress() {
+        if (isHovered) return;
+        startTime = Date.now();
+        progressBar.style.width = '0%';
+
+        clearInterval(progressTimer);
+        progressTimer = setInterval(() => {
+          if (isHovered) return;
+          const elapsed = Date.now() - startTime;
+          const percentage = Math.min((elapsed / rotateInterval) * 100, 100);
+          progressBar.style.width = `${percentage}%`;
+
+          if (elapsed >= rotateInterval) {
+            nextSlide();
+          }
+        }, 50);
+      }
+
+      function resetProgress() {
+        clearInterval(progressTimer);
+        progressBar.style.width = '0%';
+        startProgress();
+      }
+
+      function nextSlide() {
+        updateCarousel(currentIndex + 1);
+      }
+
+      function prevSlide() {
+        updateCarousel(currentIndex - 1);
+      }
+
+      // Event Listeners for Navigation
+      nextBtn.addEventListener('click', () => nextSlide());
+      prevBtn.addEventListener('click', () => prevSlide());
+
+      dots.forEach(dot => {
+        dot.addEventListener('click', (e) => {
+          const slideIndex = parseInt(e.target.getAttribute('data-slide'));
+          updateCarousel(slideIndex);
+        });
+      });
+
+      // Pause Rotation on Hover
+      widget.addEventListener('mouseenter', () => {
+        isHovered = true;
+        clearInterval(progressTimer);
+      });
+
+      widget.addEventListener('mouseleave', () => {
+        isHovered = false;
+        startProgress();
+      });
+
+      // Touch & Swipe Support
+      let touchStartX = 0;
+      let touchEndX = 0;
+
+      widget.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+      }, { passive: true });
+
+      widget.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+      }, { passive: true });
+
+      function handleSwipe() {
+        if (touchEndX < touchStartX - 40) nextSlide();
+        if (touchEndX > touchStartX + 40) prevSlide();
+      }
+
+      // Copy Embed Snippet
+      const copyBtn = document.getElementById('copyEmbedBtn');
+      const toast = document.getElementById('toast');
+
+      copyBtn.addEventListener('click', () => {
+        const embedCode = `<iframe src="ad_widget.html" width="100%" height="340" frameborder="0" scrolling="no" style="border:none; overflow:hidden;"></iframe>`;
+        
+        // Clipboard fallback
+        const el = document.createElement('textarea');
+        el.value = embedCode;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+
+        // Show Toast
+        toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-2');
+        toast.classList.add('opacity-100', 'translate-y-0');
+        setTimeout(() => {
+          toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-2');
+          toast.classList.remove('opacity-100', 'translate-y-0');
+        }, 2500);
+      });
+
+      // Initial Start
+      updateCarousel(0);
+    });
+  </script>
+</body>
+</html>
