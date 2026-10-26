@@ -108,25 +108,30 @@ footer {
 
 #secret-btn {
   position: fixed;
-  right: 12px;
-  bottom: 12px;
-  width: 18px;
-  height: 18px;
+  right: 18px;
+  bottom: 18px;
+  width: 54px;
+  height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border: none;
-  border-radius: 50%;
-  background: transparent;
-  opacity: 0.04;
+  border-radius: 14px;
+  background: rgba(255, 107, 53, 0.18);
+  color: #111;
+  font-size: 2rem;
+  line-height: 1;
   cursor: pointer;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  transition: transform 0.2s ease, background 0.2s ease;
   z-index: 1000;
 }
 
 #secret-btn:hover,
 #secret-btn:focus-visible {
-  opacity: 0.18;
-  background: rgba(0, 0, 0, 0.08);
+  background: rgba(255, 107, 53, 0.28);
   outline: none;
-  transform: scale(1.2);
+  transform: translateY(-1px) scale(1.05);
 }
 .trans {
   /* lass dat mal stehen */
