@@ -2,10 +2,6 @@
 let count = 0;
 const counterEl = document.getElementById("counter");
 
-// Checkbox und das Element mit der Klasse "trans" auswählen
-const toggleCheckbox = document.querySelector('.toggle input[type="checkbox"]');
-const transElement = document.querySelector('.trans');
-
 document.getElementById("counter-btn").addEventListener("click", () => {
   count++;
   counterEl.textContent = count;
@@ -23,7 +19,6 @@ todoForm.addEventListener("submit", (event) => {
 
   const li = document.createElement("li");
   li.textContent = text;
-  // Klick = erledigt / nicht erledigt
   li.addEventListener("click", () => li.classList.toggle("done"));
   todoList.appendChild(li);
 
@@ -31,7 +26,6 @@ todoForm.addEventListener("submit", (event) => {
 });
 
 // ---------- Zufallsspruch ----------
-// Füg gerne eigene Sprüche hinzu!
 const quotes = [
   "„Funktioniert auf meinem Rechner.“",
   "„Wer hat den main-Branch kaputt gemacht?“",
@@ -98,21 +92,28 @@ function renderChart() {
   const max = Math.max(...values);
   const spread = max - min || 1;
 
-  const points = values.map((value, index) => {
-    const x = padding + (index * (width - padding * 2)) / Math.max(values.length - 1, 1);
-    const y = height - padding - ((value - min) / spread) * (height - padding * 2);
-    return `${x},${y}`;
-  }).join(" ");
+  const points = values
+    .map((value, index) => {
+      const x = padding + (index * (width - padding * 2)) / Math.max(values.length - 1, 1);
+      const y = height - padding - ((value - min) / spread) * (height - padding * 2);
+      return `${x},${y}`;
+    })
+    .join(" ");
 
   chartLineEl.setAttribute("points", points);
-  chartFillEl.setAttribute("points", `${points} ${width - padding},${height - padding} ${padding},${height - padding}`);
+  chartFillEl.setAttribute(
+    "points",
+    `${points} ${width - padding},${height - padding} ${padding},${height - padding}`
+  );
   chartSymbolLabelEl.textContent = symbol;
 }
 
 function renderBricks() {
   const bricks = Object.entries(marketPrices)
     .map(([symbol, price]) => {
-      const statusClass = price >= (marketHistory[symbol]?.at(-2) ?? price) ? "up" : "down";
+      const previous = marketHistory[symbol]?.at(-2) ?? price;
+      const statusClass = price >= previous ? "up" : "down";
+
       return `
         <div class="brick ${statusClass}">
           <span class="brick-name">${symbol}</span>
@@ -229,19 +230,62 @@ setInterval(() => {
 
 renderTradingState();
 
-// Wir lauschen auf Veränderungen des Zustands
-toggleCheckbox.addEventListener('change', function() {
-  if (this.checked) {
-    // Wenn der Toggle AN ist: Hintergrundbild setzen
-    transElement.style.backgroundImage = 'url("trans.jpg")';
-  } else {
-    // Wenn der Toggle AUS ist: Hintergrundbild wieder entfernen
-    transElement.style.backgroundImage = 'none';
-  }
-});
 // ---------- Geheimnis ----------
 const secretBtn = document.getElementById("secret-btn");
 
 secretBtn.addEventListener("click", () => {
   window.open("https://www.youtube.com/watch?v=dQw4w9WgXcQ", "_blank", "noopener,noreferrer");
 });
+
+// ---------- Trans Toggle ----------
+const toggleCheckbox = document.querySelector('.toggle input[type="checkbox"]');
+const transElements = document.querySelectorAll('.trans');
+const transColors = ["#55CDFC", "#F7A8B8", "#FFFFFF", "#F7A8B8"];
+let currentIndex = 0;
+let colorInterval = null;
+
+function startColorLoop() {
+  if (colorInterval) return;
+
+  colorInterval = setInterval(() => {
+    const currentColor = transColors[currentIndex];
+
+    transElements.forEach((element) => {
+      element.style.color = currentColor;
+    });
+
+    currentIndex = (currentIndex + 1) % transColors.length;
+  }, 200);
+}
+
+function stopColorLoop() {
+  clearInterval(colorInterval);
+  colorInterval = null;
+
+  transElements.forEach((element) => {
+    element.style.color = "";
+  });
+}
+
+if (toggleCheckbox) {
+  toggleCheckbox.addEventListener("change", function () {
+    if (this.checked) {
+      transElements.forEach((element) => {
+        element.style.backgroundImage = 'url("trans.jpg")';
+      });
+      startColorLoop();
+    } else {
+      transElements.forEach((element) => {
+        element.style.backgroundImage = "none";
+      });
+      stopColorLoop();
+    }
+  });
+
+  if (toggleCheckbox.checked) {
+    transElements.forEach((element) => {
+      element.style.backgroundImage = 'url("trans.jpg")';
+    });
+    startColorLoop();
+  }
+}
