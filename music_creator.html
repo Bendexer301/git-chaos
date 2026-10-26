@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NEON_CHAOS // Cyberpunk Audio Synthesizer & Noise Machine</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0a0a12;
+      --neon-cyan: #00f3ff;
+      --neon-magenta: #ff0055;
+      --acid-yellow: #ffe600;
+      --panel-bg: rgba(16, 16, 28, 0.85);
+    }
+    
+    body {
+      background-color: var(--bg-dark);
+      color: #e2e8f0;
+      font-family: 'Share Tech Mono', monospace;
+      overflow-x: hidden;
+      user-select: none;
+    }
+
+    h1, h2, h3, .font-orbitron {
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    /* CRT Scanline & Glitch Effects */
+    .crt-overlay {
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+      background-size: 100% 3px, 6px 100%;
+      pointer-events: none;
+    }
+
+    /* Cyberpunk Glowing Controls */
+    .neon-border-cyan {
+      box-shadow: 0 0 10px rgba(0, 243, 255, 0.3), inset 0 0 10px rgba(0, 243, 255, 0.2);
+      border: 1px solid var(--neon-cyan);
+    }
+    .neon-border-magenta {
+      box-shadow: 0 0 10px rgba(255, 0, 85, 0.3), inset 0 0 10px rgba(255, 0, 85, 0.2);
+      border: 1px solid var(--neon-magenta);
+    }
+    .neon-border-yellow {
+      box-shadow: 0 0 10px rgba(255, 230, 0, 0.3), inset 0 0 10px rgba(255, 230, 0, 0.2);
+      border: 1px solid var(--acid-yellow);
+    }
+
+    .neon-text-cyan {
+      color: var(--neon-cyan);
+      text-shadow: 0 0 8px rgba(0, 243, 255, 0.6);
+    }
+    .neon-text-magenta {
+      color: var(--neon-magenta);
+      text-shadow: 0 0 8px rgba(255, 0, 85, 0.6);
+    }
+    .neon-text-yellow {
+      color: var(--acid-yellow);
+      text-shadow: 0 0 8px rgba(255, 230, 0, 0.6);
+    }
+
+    /* Custom Cyber Range Sliders */
+    input[type=range] {
+      -webkit-appearance: none;
+      background: #1a1a2e;
+      border: 1px solid #334155;
+      border-radius: 4px;
+      height: 8px;
+      outline: none;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 2px;
+      background: var(--neon-cyan);
+      box-shadow: 0 0 10px var(--neon-cyan);
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+
+    input[type=range].magenta-thumb::-webkit-slider-thumb {
+      background: var(--neon-magenta);
+      box-shadow: 0 0 10px var(--neon-magenta);
+    }
+
+    input[type=range].yellow-thumb::-webkit-slider-thumb {
+      background: var(--acid-yellow);
+      box-shadow: 0 0 10px var(--acid-yellow);
+    }
+
+    input[type=range]::-webkit-slider-thumb:hover {
+      transform: scale(1.25);
+    }
+
+    /* Rotary Knob UI */
+    .knob-container {
+      position: relative;
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #1e1e30 0%, #0d0d18 100%);
+      border: 2px solid #3b82f6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 0 12px rgba(59, 130, 246, 0.3);
+    }
+    
+    .knob-pointer {
+      position: absolute;
+      width: 4px;
+      height: 24px;
+      background: var(--neon-cyan);
+      box-shadow: 0 0 8px var(--neon-cyan);
+      top: 6px;
+      transform-origin: bottom center;
+      border-radius: 2px;
+    }
+
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0a0a12;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border: 1px solid var(--neon-cyan);
+    }
+  </style>
+</head>
+<body class="min-h-screen relative flex flex-col justify-between p-2 md:p-6">
+
+  <!-- CRT Screen Overlay Effect -->
+  <div class="crt-overlay fixed inset-0 z-40 pointer-events-none"></div>
+
+  <!-- INITIALIZATION OVERLAY (AudioContext Unlock Gate) -->
+  <div id="init-overlay" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/95 backdrop-blur-md p-4 text-center">
+    <div class="max-w-md w-full border-2 border-cyan-500 p-8 rounded-lg bg-[#0d0d18] shadow-[0_0_30px_rgba(0,243,255,0.4)]">
+      <div class="text-xs text-cyan-400 mb-2 tracking-widest font-mono">[ SYSTEM OFFLINE // AUTH REQUIRED ]</div>
+      <h1 class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-pink-500 to-yellow-400 mb-4 font-orbitron">
+        NEON_CHAOS
+      </h1>
+      <p class="text-slate-400 text-sm mb-6 font-mono leading-relaxed">
+        High-entropy cyberpunk synth engine, multi-mode noise generators, real-time spatial FX, and dynamic oscilloscope visualizer.
+      </p>
+      <button id="btn-power-on" class="w-full py-4 bg-cyan-500 hover:bg-cyan-400 text-black font-black tracking-wider text-lg rounded font-orbitron transition-all duration-300 shadow-[0_0_20px_rgba(0,243,255,0.8)] hover:shadow-[0_0_30px_rgba(0,243,255,1)]">
+        INITIALIZE SYSTEM // POWER ON
+      </button>
+      <div class="mt-4 text-[10px] text-slate-500 font-mono">WARNING: EXTREME CHAOS PARAMETERS MAY GENERATE SELF-OSCILLATING FEEDBACK. HARD COMPRESSOR LIMITER ACTIVE.</div>
+    </div>
+  </div>
+
+  <!-- MAIN AUDIO ENGINE INTERFACE -->
+  <div class="max-w-7xl mx-auto w-full space-y-4">
+    
+    <!-- HEADER BAR -->
+    <header class="flex flex-col md:flex-row justify-between items-center bg-[#10101c] p-4 rounded-lg neon-border-cyan gap-4">
+      <div class="flex items-center space-x-3">
+        <div class="w-4 h-4 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_10px_#00f3ff]"></div>
+        <h1 class="text-2xl font-black tracking-wider font-orbitron text-cyan-400">NEON_CHAOS <span class="text-xs text-pink-500 font-mono">// AUDIO GENERATOR v2.6</span></h1>
+      </div>
+
+      <!-- Quick Action Buttons -->
+      <div class="flex items-center space-x-2 w-full md:w-auto overflow-x-auto">
+        <button id="btn-preset-cyber" class="px-3 py-1.5 bg-slate-800 hover:bg-cyan-900 border border-cyan-500 text-cyan-400 text-xs rounded transition font-mono">PRESET: CYBERPUNK</button>
+        <button id="btn-preset-dystopia" class="px-3 py-1.5 bg-slate-800 hover:bg-pink-900 border border-pink-500 text-pink-400 text-xs rounded transition font-mono">PRESET: DYSTOPIA</button>
+        <button id="btn-preset-glitch" class="px-3 py-1.5 bg-slate-800 hover:bg-yellow-900 border border-yellow-500 text-yellow-400 text-xs rounded transition font-mono">PRESET: GLITCH</button>
+        <button id="btn-randomize" class="px-3 py-1.5 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-bold text-xs rounded shadow-[0_0_10px_rgba(255,0,85,0.5)] transition font-mono">RANDOMIZE ALL</button>
+      </div>
+    </header>
+
+    <!-- VISUALIZERS DISPLAY ROW -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- Oscilloscope -->
+      <div class="bg-[#10101c] p-3 rounded-lg neon-border-cyan relative">
+        <div class="flex justify-between items-center mb-1 text-xs text-cyan-400 font-mono">
+          <span>// OSCILLOSCOPE (TIME DOMAIN)</span>
+          <span id="scope-status" class="text-emerald-400">SIGNAL ACTIVE</span>
+        </div>
+        <canvas id="canvas-oscilloscope" class="w-full h-36 bg-[#05050a] rounded border border-cyan-900/50"></canvas>
+      </div>
+
+      <!-- Spectrum Analyzer & Particle Grid -->
+      <div class="bg-[#10101c] p-3 rounded-lg neon-border-magenta relative">
+        <div class="flex justify-between items-center mb-1 text-xs text-pink-500 font-mono">
+          <span>// SPECTRUM ANALYZER (FREQUENCY MATRIX)</span>
+          <span id="fps-counter" class="text-pink-400">60 FPS</span>
+        </div>
+        <canvas id="canvas-spectrum" class="w-full h-36 bg-[#05050a] rounded border border-pink-900/50"></canvas>
+      </div>
+    </div>
+
+    <!-- MAIN CONTROL PANELS MATRIX -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      
+      <!-- PANEL 1: AUDIO SOURCES & NOISE GENERATOR -->
+      <div class="bg-[#10101c] p-4 rounded-lg neon-border-cyan flex flex-col justify-between space-y-4">
+        <h2 class="text-sm font-bold text-cyan-400 border-b border-cyan-900 pb-1 font-orbitron tracking-wider">// OSCILLATOR & NOISE ENGINE</h2>
+        
+        <!-- Main Waveform Select -->
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">SYNTH WAVEFORM</label>
+          <div class="grid grid-cols-4 gap-1">
+            <button data-wave="sawtooth" class="btn-wave active bg-cyan-900/80 border border-cyan-400 text-cyan-300 text-xs py-1 rounded">SAW</button>
+            <button data-wave="square" class="btn-wave bg-slate-800 border border-slate-700 text-slate-400 text-xs py-1 rounded">SQR</button>
+            <button data-wave="sine" class="btn-wave bg-slate-800 border border-slate-700 text-slate-400 text-xs py-1 rounded">SIN</button>
+            <button data-wave="triangle" class="btn-wave bg-slate-800 border border-slate-700 text-slate-400 text-xs py-1 rounded">TRI</button>
+          </div>
+        </div>
+
+        <!-- Base Frequency & Pitch Mod -->
+        <div class="space-y-2">
+          <div class="flex justify-between text-xs">
+            <span class="text-slate-300">BASE FREQ</span>
+            <span id="val-base-freq" class="text-cyan-400">110 Hz</span>
+          </div>
+          <input type="range" id="param-base-freq" min="30" max="880" value="110" class="w-full">
+        </div>
+
+        <!-- Noise Generator Buffer Selection -->
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">ATMOSPHERIC NOISE SOURCE</label>
+          <div class="grid grid-cols-3 gap-1 mb-2">
+            <button data-noise="white" class="btn-noise active bg-cyan-900/80 border border-cyan-400 text-cyan-300 text-xs py-1 rounded">WHITE</button>
+            <button data-noise="pink" class="btn-noise bg-slate-800 border border-slate-700 text-slate-400 text-xs py-1 rounded">PINK</button>
+            <button data-noise="brown" class="btn-noise bg-slate-800 border border-slate-700 text-slate-400 text-xs py-1 rounded">BROWN</button>
+          </div>
+          <div class="flex justify-between text-xs mb-1">
+            <span class="text-slate-300">NOISE MIX LEVEL</span>
+            <span id="val-noise-vol" class="text-cyan-400">30%</span>
+          </div>
+          <input type="range" id="param-noise-vol" min="0" max="1" step="0.01" value="0.3" class="w-full">
+        </div>
+
+        <!-- Multi-mode Filter Controls -->
+        <div class="space-y-2 pt-2 border-t border-slate-800">
+          <div class="flex justify-between items-center">
+            <label class="text-xs text-slate-300 font-bold">FILTER TYPE</label>
+            <select id="param-filter-type" class="bg-slate-900 border border-cyan-500 text-cyan-400 text-xs rounded px-2 py-0.5">
+              <option value="lowpass">LOWPASS</option>
+              <option value="highpass">HIGHPASS</option>
+              <option value="bandpass">BANDPASS</option>
+            </select>
+          </div>
+          <div class="flex justify-between text-xs">
+            <span class="text-slate-400">CUTOFF FREQ</span>
+            <span id="val-filter-cutoff" class="text-cyan-400">2400 Hz</span>
+          </div>
+          <input type="range" id="param-filter-cutoff" min="100" max="10000" value="2400" class="w-full">
+          
+          <div class="flex justify-between text-xs">
+            <span class="text-slate-400">RESONANCE (Q)</span>
+            <span id="val-filter-q" class="text-cyan-400">2.0</span>
+          </div>
+          <input type="range" id="param-filter-q" min="0.1" max="20" step="0.1" value="2.0" class="w-full">
+        </div>
+      </div>
+
+      <!-- PANEL 2: VIBE PARAMETERS & FX ENGINE -->
+      <div class="bg-[#10101c] p-4 rounded-lg neon-border-magenta flex flex-col justify-between space-y-4">
+        <h2 class="text-sm font-bold text-pink-500 border-b border-pink-900 pb-1 font-orbitron tracking-wider">// VIBE PARAMETERS & FX SIGNAL CHAIN</h2>
+        
+        <!-- 1. Cyber-Haze (Reverb Depth + Lowpass Roll-off) -->
+        <div class="space-y-1">
+          <div class="flex justify-between text-xs">
+            <span class="text-pink-400 font-bold">CYBER-HAZE</span>
+            <span id="val-cyber-haze" class="text-pink-400">40%</span>
+          </div>
+          <div class="text-[10px] text-slate-500">Blends spatial delay reverb & lowpass attenuation</div>
+          <input type="range" id="param-cyber-haze" min="0" max="1" step="0.01" value="0.4" class="w-full magenta-thumb">
+        </div>
+
+        <!-- 2. Dystopian Warmth (Drive + Chorus Blend) -->
+        <div class="space-y-1">
+          <div class="flex justify-between text-xs">
+            <span class="text-pink-400 font-bold">DYSTOPIAN WARMTH</span>
+            <span id="val-dystopian-warmth" class="text-pink-400">25%</span>
+          </div>
+          <div class="text-[10px] text-slate-500">Injects tube overdrive saturation & thick chorus</div>
+          <input type="range" id="param-dystopian-warmth" min="0" max="1" step="0.01" value="0.25" class="w-full magenta-thumb">
+        </div>
+
+        <!-- 3. Neural Drift (Pitch Vibrato LFO Depth) -->
+        <div class="space-y-1">
+          <div class="flex justify-between text-xs">
+            <span class="text-pink-400 font-bold">NEURAL DRIFT</span>
+            <span id="val-neural-drift" class="text-pink-400">15%</span>
+          </div>
+          <div class="text-[10px] text-slate-500">Slow random frequency pitch wander (LFO)</div>
+          <input type="range" id="param-neural-drift" min="0" max="1" step="0.01" value="0.15" class="w-full magenta-thumb">
+        </div>
+
+        <!-- Chorus / Flanger FX Parameters -->
+        <div class="pt-2 border-t border-slate-800 space-y-2">
+          <div class="flex justify-between text-xs">
+            <span class="text-slate-300">CHORUS MOD RATE</span>
+            <span id="val-chorus-rate" class="text-pink-400">1.5 Hz</span>
+          </div>
+          <input type="range" id="param-chorus-rate" min="0.1" max="8" step="0.1" value="1.5" class="w-full magenta-thumb">
+
+          <div class="flex justify-between text-xs">
+            <span class="text-slate-300">OVERDRIVE DISTORTION</span>
+            <span id="val-distortion" class="text-pink-400">20%</span>
+          </div>
+          <input type="range" id="param-distortion" min="0" max="1" step="0.01" value="0.2" class="w-full magenta-thumb">
+        </div>
+      </div>
+
+      <!-- PANEL 3: PSEUDO PARAMETERS & STRAIGHT CHAOS -->
+      <div class="bg-[#10101c] p-4 rounded-lg neon-border-yellow flex flex-col justify-between space-y-4">
+        <h2 class="text-sm font-bold text-yellow-400 border-b border-yellow-900 pb-1 font-orbitron tracking-wider">// CHAOS & PLACEBO CORE</h2>
+
+        <!-- PSEUDO / PLACEBO KNOBS -->
+        <div class="bg-black/40 p-2 rounded border border-yellow-900/50">
+          <div class="text-[10px] text-yellow-500 font-bold mb-2">// PLACEBO LORE CONTROLS (ZERO AUDIO IMPREGNATION)</div>
+          <div class="grid grid-cols-3 gap-2 text-center">
+            <!-- Knob 1 -->
+            <div class="flex flex-col items-center">
+              <div class="knob-container" id="knob-quantum" data-value="42">
+                <div class="knob-pointer" id="pointer-quantum" style="transform: rotate(45deg);"></div>
+              </div>
+              <span class="text-[10px] text-yellow-300 mt-1 font-bold">QUANTUM</span>
+              <span id="val-quantum" class="text-[10px] text-slate-400">42%</span>
+            </div>
+            <!-- Knob 2 -->
+            <div class="flex flex-col items-center">
+              <div class="knob-container" id="knob-defrag" data-value="88">
+                <div class="knob-pointer" id="pointer-defrag" style="transform: rotate(120deg);"></div>
+              </div>
+              <span class="text-[10px] text-yellow-300 mt-1 font-bold">DEFRAG</span>
+              <span id="val-defrag" class="text-[10px] text-slate-400">88%</span>
+            </div>
+            <!-- Knob 3 -->
+            <div class="flex flex-col items-center">
+              <div class="knob-container" id="knob-overclock" data-value="99">
+                <div class="knob-pointer" id="pointer-overclock" style="transform: rotate(170deg);"></div>
+              </div>
+              <span class="text-[10px] text-yellow-300 mt-1 font-bold">OVERCLOCK</span>
+              <span id="val-overclock" class="text-[10px] text-slate-400">99 Ghz</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- STRAIGHT CHAOS PARAMETERS -->
+        <div class="space-y-3 pt-2">
+          <!-- ANOMALY KNOB -->
+          <div>
+            <div class="flex justify-between text-xs">
+              <span class="text-yellow-400 font-bold">ANOMALY KNOB</span>
+              <span id="val-anomaly" class="text-yellow-400">0%</span>
+            </div>
+            <div class="text-[10px] text-slate-500 mb-1">Drives Extreme Delay Time & Filter Auto-Oscillation</div>
+            <input type="range" id="param-anomaly" min="0" max="1" step="0.01" value="0" class="w-full yellow-thumb">
+          </div>
+
+          <!-- CHAOS TRIGGER BUTTONS -->
+          <div class="grid grid-cols-2 gap-2 pt-1">
+            <button id="btn-entropy" class="py-2 bg-yellow-500/20 hover:bg-yellow-500 border border-yellow-400 text-yellow-300 hover:text-black font-bold text-xs rounded transition font-orbitron shadow-[0_0_10px_rgba(255,230,0,0.3)]">
+              ENTROPY // OVERDRIVE
+            </button>
+            <button id="btn-glitch-detonator" class="py-2 bg-red-600/30 hover:bg-red-600 border border-red-500 text-red-300 hover:text-white font-bold text-xs rounded transition font-orbitron shadow-[0_0_10px_rgba(239,68,68,0.4)]">
+              GLITCH DETONATOR
+            </button>
+          </div>
+        </div>
+
+        <!-- MASTER VOLUME & LIMITER METER -->
+        <div class="pt-2 border-t border-slate-800 flex items-center space-x-3">
+          <div class="flex-1">
+            <div class="flex justify-between text-xs mb-1">
+              <span class="text-slate-300 font-bold">MASTER VOLUME</span>
+              <span id="val-master-vol" class="text-cyan-400">75%</span>
+            </div>
+            <input type="range" id="param-master-vol" min="0" max="1" step="0.01" value="0.75" class="w-full">
+          </div>
+          <!-- Hard Safety Limiter Active Badge -->
+          <div class="bg-emerald-950 border border-emerald-500 p-1.5 rounded text-center">
+            <div class="text-[9px] text-emerald-400 font-bold">LIMITER</div>
+            <div class="text-[8px] text-emerald-300">PROTECTED</div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- PANEL 4: 16-STEP CYBER SEQUENCER ENGINE -->
+    <div class="bg-[#10101c] p-4 rounded-lg neon-border-cyan space-y-3">
+      <div class="flex flex-col md:flex-row justify-between items-center gap-2 border-b border-cyan-900 pb-2">
+        <div class="flex items-center space-x-3">
+          <h2 class="text-sm font-bold text-cyan-400 font-orbitron tracking-wider">// 16-STEP NEON SEQUENCER</h2>
+          <button id="btn-seq-toggle" class="px-4 py-1 bg-cyan-500 hover:bg-cyan-400 text-black font-black text-xs rounded font-orbitron transition">
+            PAUSE
+          </button>
+        </div>
+
+        <!-- Tempo / Speed Controls -->
+        <div class="flex items-center space-x-4 w-full md:w-auto">
+          <div class="flex items-center space-x-2">
+            <span class="text-xs text-slate-400">TEMPO:</span>
+            <input type="range" id="param-seq-bpm" min="40" max="280" value="130" class="w-28">
+            <span id="val-seq-bpm" class="text-xs text-cyan-400 font-mono">130 BPM</span>
+          </div>
+
+          <button id="btn-seq-clear" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs rounded font-mono">
+            RESET PITCHES
+          </button>
+        </div>
+      </div>
+
+      <!-- Sequencer Grid (16 Steps) -->
+      <div id="sequencer-grid" class="grid grid-cols-8 md:grid-cols-16 gap-1.5 pt-2">
+        <!-- 16 Dynamic step columns created via JS -->
+      </div>
+    </div>
+
+  </div>
+
+  <!-- AUDIO ENGINE & APPLICATION CONTROLLER SCRIPT -->
+  <script>
+    /**
+     * NEON_CHAOS Web Audio Engine & Visualizer Core
+     * Completely self-contained vanilla JS Web Audio Signal Chain
+     */
+    class NeonChaosAudioEngine {
+      constructor() {
+        this.ctx = null;
+        this.isInitialized = false;
+
+        // Audio Nodes
+        this.oscNode = null;
+        this.noiseNode = null;
+        this.noiseGainNode = null;
+        this.filterNode = null;
+        this.distortionNode = null;
+        this.chorusDelayNode = null;
+        this.chorusLfoNode = null;
+        this.chorusGainNode = null;
+        this.reverbDelayNode = null;
+        this.reverbFeedbackGain = null;
+        this.reverbFilterNode = null;
+        this.masterGainNode = null;
+        this.limiterNode = null;
+        this.analyserNode = null;
+
+        // Neural Drift Pitch LFO
+        this.driftLfoNode = null;
+        this.driftLfoGain = null;
+
+        // Noise Buffers
+        this.noiseBuffers = {};
+        this.currentNoiseType = 'white';
+        this.currentWaveform = 'sawtooth';
+
+        // Sequencer Engine Data
+        this.seqRunning = true;
+        this.currentStep = 0;
+        this.bpm = 130;
+        this.seqTimer = null;
+        // Pitch transpose multiplier for 16 steps
+        this.seqPitches = [1, 1.25, 1.5, 1, 1.33, 1.5, 1.87, 2, 1, 0.87, 1.25, 1.5, 1.33, 1.75, 2, 0.5];
+        this.seqActive = [true, true, true, false, true, true, false, true, true, true, true, false, true, true, true, false];
+
+        // Parameters State
+        this.params = {
+          baseFreq: 110,
+          noiseVol: 0.3,
+          filterType: 'lowpass',
+          filterCutoff: 2400,
+          filterQ: 2.0,
+          cyberHaze: 0.4,
+          dystopianWarmth: 0.25,
+          neuralDrift: 0.15,
+          chorusRate: 1.5,
+          distortion: 0.2,
+          anomaly: 0,
+          masterVol: 0.75
+        };
+      }
+
+      init() {
+        if (this.isInitialized) return;
+
+        // 1. Initialize AudioContext
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        this.ctx = new AudioContext();
+
+        // 2. Build Noise Buffers (White, Pink, Brownian)
+        this.buildNoiseBuffers();
+
+        // 3. Create Main Synth Oscillator
+        this.oscNode = this.ctx.createOscillator();
+        this.oscNode.type = this.currentWaveform;
+        this.oscNode.frequency.setValueAtTime(this.params.baseFreq, this.ctx.currentTime);
+
+        // 4. Create Pitch Drift LFO
+        this.driftLfoNode = this.ctx.createOscillator();
+        this.driftLfoNode.frequency.setValueAtTime(0.2, this.ctx.currentTime); // Slow 0.2Hz wander
+        this.driftLfoGain = this.ctx.createGain();
+        this.driftLfoGain.gain.setValueAtTime(this.params.baseFreq * this.params.neuralDrift * 0.1, this.ctx.currentTime);
+        this.driftLfoNode.connect(this.driftLfoGain);
+        this.driftLfoGain.connect(this.oscNode.frequency);
+        this.driftLfoNode.start();
+
+        // 5. Create Atmospheric Noise Source Node
+        this.noiseNode = this.ctx.createBufferSource();
+        this.noiseNode.buffer = this.noiseBuffers[this.currentNoiseType];
+        this.noiseNode.loop = true;
+        this.noiseGainNode = this.ctx.createGain();
+        this.noiseGainNode.gain.setValueAtTime(this.params.noiseVol, this.ctx.currentTime);
+        this.noiseNode.start();
+
+        // 6. Primary Multi-mode Filter
+        this.filterNode = this.ctx.createBiquadFilter();
+        this.filterNode.type = this.params.filterType;
+        this.filterNode.frequency.setValueAtTime(this.params.filterCutoff, this.ctx.currentTime);
+        this.filterNode.Q.setValueAtTime(this.params.filterQ, this.ctx.currentTime);
+
+        // 7. Overdrive Distortion Node (WaveShaper)
+        this.distortionNode = this.ctx.createWaveShaper();
+        this.distortionNode.curve = this.makeDistortionCurve(this.params.distortion * 50);
+        this.distortionNode.oversample = '4x';
+
+        // 8. Chorus / Modulation Delay Node
+        this.chorusDelayNode = this.ctx.createDelay();
+        this.chorusDelayNode.delayTime.setValueAtTime(0.025, this.ctx.currentTime);
+        this.chorusLfoNode = this.ctx.createOscillator();
+        this.chorusLfoNode.frequency.setValueAtTime(this.params.chorusRate, this.ctx.currentTime);
+        this.chorusGainNode = this.ctx.createGain();
+        this.chorusGainNode.gain.setValueAtTime(0.003 * this.params.dystopianWarmth, this.ctx.currentTime);
+        this.chorusLfoNode.connect(this.chorusGainNode);
+        this.chorusGainNode.connect(this.chorusDelayNode.delayTime);
+        this.chorusLfoNode.start();
+
+        // 9. Cyber-Haze Spatial Delay / Reverb Tail
+        this.reverbDelayNode = this.ctx.createDelay();
+        this.reverbDelayNode.delayTime.setValueAtTime(0.35, this.ctx.currentTime);
+        this.reverbFeedbackGain = this.ctx.createGain();
+        this.reverbFeedbackGain.gain.setValueAtTime(this.params.cyberHaze * 0.7, this.ctx.currentTime);
+        this.reverbFilterNode = this.ctx.createBiquadFilter();
+        this.reverbFilterNode.type = 'lowpass';
+        this.reverbFilterNode.frequency.setValueAtTime(3000, this.ctx.currentTime);
+
+        // Reverb Feedback Loop
+        this.reverbDelayNode.connect(this.reverbFilterNode);
+        this.reverbFilterNode.connect(this.reverbFeedbackGain);
+        this.reverbFeedbackGain.connect(this.reverbDelayNode);
+
+        // 10. Master Volume & Hard Safety Limiter
+        this.masterGainNode = this.ctx.createGain();
+        this.masterGainNode.gain.setValueAtTime(this.params.masterVol, this.ctx.currentTime);
+
+        this.limiterNode = this.ctx.createDynamicsCompressor();
+        this.limiterNode.threshold.setValueAtTime(-1.0, this.ctx.currentTime);
+        this.limiterNode.knee.setValueAtTime(0.0, this.ctx.currentTime);
+        this.limiterNode.ratio.setValueAtTime(20.0, this.ctx.currentTime);
+        this.limiterNode.attack.setValueAtTime(0.003, this.ctx.currentTime);
+        this.limiterNode.release.setValueAtTime(0.1, this.ctx.currentTime);
+
+        // 11. Analyser Node for Visualizers
+        this.analyserNode = this.ctx.createAnalyser();
+        this.analyserNode.fftSize = 2048;
+
+        // --- AUDIO SIGNAL ROUTING CHAIN ---
+        // (Oscillator + Noise) -> Primary Filter -> Distortion -> Chorus -> Master Gain -> Limiter -> Analyser -> Output
+        this.oscNode.connect(this.filterNode);
+        this.noiseNode.connect(this.noiseGainNode);
+        this.noiseGainNode.connect(this.filterNode);
+
+        this.filterNode.connect(this.distortionNode);
+        this.distortionNode.connect(this.chorusDelayNode);
+        this.chorusDelayNode.connect(this.masterGainNode);
+
+        // Parallel Reverb Send (Cyber-Haze)
+        this.distortionNode.connect(this.reverbDelayNode);
+        this.reverbDelayNode.connect(this.masterGainNode);
+
+        // Master Chain
+        this.masterGainNode.connect(this.limiterNode);
+        this.limiterNode.connect(this.analyserNode);
+        this.analyserNode.connect(this.ctx.destination);
+
+        // Start Oscillator
+        this.oscNode.start();
+
+        // Start Sequencer Clock
+        this.startSequencer();
+
+        this.isInitialized = true;
+      }
+
+      // Generates procedural noise buffers
+      buildNoiseBuffers() {
+        const bufferSize = this.ctx.sampleRate * 3; // 3 Seconds loop
+        
+        // 1. White Noise
+        const whiteBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const whiteData = whiteBuffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          whiteData[i] = Math.random() * 2 - 1;
+        }
+        this.noiseBuffers['white'] = whiteBuffer;
+
+        // 2. Pink Noise (Paul Kellet's algorithm)
+        const pinkBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const pinkData = pinkBuffer.getChannelData(0);
+        let b0=0, b1=0, b2=0, b3=0, b4=0, b5=0, b6=0;
+        for (let i = 0; i < bufferSize; i++) {
+          let white = Math.random() * 2 - 1;
+          b0 = 0.99886 * b0 + white * 0.0555179;
+          b1 = 0.99332 * b1 + white * 0.0750759;
+          b2 = 0.96900 * b2 + white * 0.1538520;
+          b3 = 0.86650 * b3 + white * 0.3104856;
+          b4 = 0.55000 * b4 + white * 0.5329522;
+          b5 = -0.7616 * b5 - white * 0.0168980;
+          pinkData[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
+          pinkData[i] *= 0.11;
+          b6 = white * 0.115926;
+        }
+        this.noiseBuffers['pink'] = pinkBuffer;
+
+        // 3. Brownian / Red Noise
+        const brownBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const brownData = brownBuffer.getChannelData(0);
+        let lastOutput = 0.0;
+        for (let i = 0; i < bufferSize; i++) {
+          let white = Math.random() * 2 - 1;
+          brownData[i] = (lastOutput + (0.02 * white)) / 1.02;
+          lastOutput = brownData[i];
+          brownData[i] *= 3.5;
+        }
+        this.noiseBuffers['brown'] = brownBuffer;
+      }
+
+      // WaveShaper Distortion Curve Generator
+      makeDistortionCurve(amount) {
+        const k = typeof amount === 'number' ? amount : 50;
+        const n_samples = 44100;
+        const curve = new Float32Array(n_samples);
+        const deg = Math.PI / 180;
+        for (let i = 0; i < n_samples; ++i) {
+          let x = (i * 2) / n_samples - 1;
+          curve[i] = ((3 + k) * x * 20 * deg) / (Math.PI + k * Math.abs(x));
+        }
+        return curve;
+      }
+
+      // Update Engine Parameters Realtime
+      updateParameters() {
+        if (!this.isInitialized) return;
+        const now = this.ctx.currentTime;
+
+        // Primary Oscillator Waveform
+        if (this.oscNode.type !== this.currentWaveform) {
+          this.oscNode.type = this.currentWaveform;
+        }
+
+        // Filter Cutoff & Resonance with Anomaly Modulation
+        let effectiveCutoff = this.params.filterCutoff;
+        let effectiveQ = this.params.filterQ;
+        
+        // Anomaly Knob alters filter resonance into self-oscillation & pushes delay times
+        if (this.params.anomaly > 0) {
+          effectiveCutoff += Math.sin(now * 10) * (this.params.anomaly * 4000);
+          effectiveQ += this.params.anomaly * 25; // High Q causes self oscillation
+        }
+
+        this.filterNode.type = this.params.filterType;
+        this.filterNode.frequency.setTargetAtTime(Math.max(20, Math.min(18000, effectiveCutoff)), now, 0.03);
+        this.filterNode.Q.setTargetAtTime(Math.max(0.1, Math.min(30, effectiveQ)), now, 0.03);
+
+        // Cyber-Haze (Reverb Depth + Lowpass Dampening)
+        const hazeGain = Math.min(0.9, this.params.cyberHaze * 0.85 + (this.params.anomaly * 0.3));
+        this.reverbFeedbackGain.gain.setTargetAtTime(hazeGain, now, 0.05);
+
+        // Dystopian Warmth (Distortion + Chorus Depth)
+        const totalDist = Math.min(1.0, this.params.distortion + (this.params.dystopianWarmth * 0.4));
+        this.distortionNode.curve = this.makeDistortionCurve(totalDist * 80);
+        this.chorusGainNode.gain.setTargetAtTime(0.002 * (this.params.dystopianWarmth + 0.1), now, 0.05);
+        this.chorusLfoNode.frequency.setTargetAtTime(this.params.chorusRate, now, 0.05);
+
+        // Neural Drift Pitch Wandering
+        this.driftLfoGain.gain.setTargetAtTime(this.params.baseFreq * (this.params.neuralDrift * 0.25), now, 0.05);
+
+        // Noise Volume
+        this.noiseGainNode.gain.setTargetAtTime(this.params.noiseVol, now, 0.03);
+
+        // Master Volume
+        this.masterGainNode.gain.setTargetAtTime(this.params.masterVol, now, 0.03);
+      }
+
+      // 16-Step Audio Sequencer Engine Clock
+      startSequencer() {
+        const stepInterval = () => {
+          if (this.seqRunning && this.isInitialized) {
+            const now = this.ctx.currentTime;
+            
+            // Advance step
+            this.currentStep = (this.currentStep + 1) % 16;
+            
+            // If active step, trigger frequency adjustment
+            if (this.seqActive[this.currentStep]) {
+              const pitchMult = this.seqPitches[this.currentStep];
+              const targetFreq = this.params.baseFreq * pitchMult;
+              
+              this.oscNode.frequency.cancelScheduledValues(now);
+              this.oscNode.frequency.setTargetAtTime(targetFreq, now, 0.015);
+            }
+
+            // Highlight Sequencer Step in UI
+            updateSequencerUI(this.currentStep);
+          }
+
+          // Dynamic tempo interval scheduling
+          const stepMs = (60 / this.bpm / 4) * 1000;
+          this.seqTimer = setTimeout(stepInterval, stepMs);
+        };
+
+        stepInterval();
+      }
+
+      // Chaos Trigger: ENTROPY OVERDRIVE
+      triggerEntropyOverdrive() {
+        if (!this.isInitialized) return;
+        this.params.baseFreq = Math.floor(Math.random() * 400 + 60);
+        this.params.filterCutoff = Math.floor(Math.random() * 6000 + 400);
+        this.params.filterQ = Math.random() * 12 + 1;
+        this.params.distortion = Math.random() * 0.7 + 0.2;
+        this.params.anomaly = Math.random() * 0.5;
+
+        // Randomize step pitches
+        for (let i = 0; i < 16; i++) {
+          this.seqPitches[i] = parseFloat((Math.random() * 2 + 0.5).toFixed(2));
+        }
+
+        syncUIWithParams();
+        this.updateParameters();
+      }
+
+      // Chaos Trigger: GLITCH DETONATOR
+      triggerGlitchDetonator() {
+        if (!this.isInitialized) return;
+        const now = this.ctx.currentTime;
+
+        // Rapid Burst Noise & Frequency Jump
+        this.noiseGainNode.gain.setValueAtTime(1.0, now);
+        this.noiseGainNode.gain.exponentialRampToValueAtTime(this.params.noiseVol, now + 0.4);
+
+        this.oscNode.frequency.setValueAtTime(this.params.baseFreq * 3.5, now);
+        this.oscNode.frequency.exponentialRampToValueAtTime(this.params.baseFreq, now + 0.3);
+
+        // Temporary Sequencer Speed Jump
+        const originalBpm = this.bpm;
+        this.bpm = Math.min(280, originalBpm * 1.8);
+        setTimeout(() => {
+          this.bpm = originalBpm;
+          document.getElementById('param-seq-bpm').value = originalBpm;
+          document.getElementById('val-seq-bpm').textContent = `${originalBpm} BPM`;
+        }, 800);
+      }
+    }
+
+    // Instantiation
+    const engine = new NeonChaosAudioEngine();
+
+    // --- UI CONTROLLER & EVENT LISTENERS ---
+    
+    // 1. System Power On Button
+    document.getElementById('btn-power-on').addEventListener('click', () => {
+      engine.init();
+      document.getElementById('init-overlay').classList.add('hidden');
+      initVisualizers();
+      initSequencerGridUI();
+    });
+
+    // 2. Waveform Selector Buttons
+    document.querySelectorAll('.btn-wave').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        document.querySelectorAll('.btn-wave').forEach(b => {
+          b.classList.remove('bg-cyan-900/80', 'border-cyan-400', 'text-cyan-300');
+          b.classList.add('bg-slate-800', 'border-slate-700', 'text-slate-400');
+        });
+        e.target.classList.remove('bg-slate-800', 'border-slate-700', 'text-slate-400');
+        e.target.classList.add('bg-cyan-900/80', 'border-cyan-400', 'text-cyan-300');
+        engine.currentWaveform = e.target.dataset.wave;
+        engine.updateParameters();
+      });
+    });
+
+    // 3. Noise Source Selector Buttons
+    document.querySelectorAll('.btn-noise').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        document.querySelectorAll('.btn-noise').forEach(b => {
+          b.classList.remove('bg-cyan-900/80', 'border-cyan-400', 'text-cyan-300');
+          b.classList.add('bg-slate-800', 'border-slate-700', 'text-slate-400');
+        });
+        e.target.classList.remove('bg-slate-800', 'border-slate-700', 'text-slate-400');
+        e.target.classList.add('bg-cyan-900/80', 'border-cyan-400', 'text-cyan-300');
+        engine.currentNoiseType = e.target.dataset.noise;
+        if (engine.noiseNode && engine.noiseBuffers[engine.currentNoiseType]) {
+          engine.noiseNode.buffer = engine.noiseBuffers[engine.currentNoiseType];
+        }
+      });
+    });
+
+    // 4. Slider Parameter Binding Helper
+    function bindSlider(id, valId, unit, paramKey, transform = v => v) {
+      const slider = document.getElementById(id);
+      const valDisplay = document.getElementById(valId);
+      slider.addEventListener('input', (e) => {
+        const val = parseFloat(e.target.value);
+        valDisplay.textContent = `${transform(val)} ${unit}`.trim();
+        engine.params[paramKey] = val;
+        engine.updateParameters();
+      });
+    }
+
+    bindSlider('param-base-freq', 'val-base-freq', 'Hz', 'baseFreq', Math.round);
+    bindSlider('param-noise-vol', 'val-noise-vol', '%', 'noiseVol', v => Math.round(v * 100));
+    bindSlider('param-filter-cutoff', 'val-filter-cutoff', 'Hz', 'filterCutoff', Math.round);
+    bindSlider('param-filter-q', 'val-filter-q', '', 'filterQ', v => parseFloat(v).toFixed(1));
+    bindSlider('param-cyber-haze', 'val-cyber-haze', '%', 'cyberHaze', v => Math.round(v * 100));
+    bindSlider('param-dystopian-warmth', 'val-dystopian-warmth', '%', 'dystopianWarmth', v => Math.round(v * 100));
+    bindSlider('param-neural-drift', 'val-neural-drift', '%', 'neuralDrift', v => Math.round(v * 100));
+    bindSlider('param-chorus-rate', 'val-chorus-rate', 'Hz', 'chorusRate', v => parseFloat(v).toFixed(1));
+    bindSlider('param-distortion', 'val-distortion', '%', 'distortion', v => Math.round(v * 100));
+    bindSlider('param-anomaly', 'val-anomaly', '%', 'anomaly', v => Math.round(v * 100));
+    bindSlider('param-master-vol', 'val-master-vol', '%', 'masterVol', v => Math.round(v * 100));
+
+    // Filter Type Selector
+    document.getElementById('param-filter-type').addEventListener('change', (e) => {
+      engine.params.filterType = e.target.value;
+      engine.updateParameters();
+    });
+
+    // Sequencer BPM
+    document.getElementById('param-seq-bpm').addEventListener('input', (e) => {
+      engine.bpm = parseInt(e.target.value);
+      document.getElementById('val-seq-bpm').textContent = `${engine.bpm} BPM`;
+    });
+
+    // Sequencer Toggle Pause/Play
+    document.getElementById('btn-seq-toggle').addEventListener('click', (e) => {
+      engine.seqRunning = !engine.seqRunning;
+      e.target.textContent = engine.seqRunning ? 'PAUSE' : 'PLAY';
+      e.target.classList.toggle('bg-cyan-500');
+      e.target.classList.toggle('bg-yellow-500');
+    });
+
+    // Sequencer Reset Pitches
+    document.getElementById('btn-seq-clear').addEventListener('click', () => {
+      engine.seqPitches = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
+      initSequencerGridUI();
+    });
+
+    // Chaos Triggers
+    document.getElementById('btn-entropy').addEventListener('click', () => engine.triggerEntropyOverdrive());
+    document.getElementById('btn-glitch-detonator').addEventListener('click', () => engine.triggerGlitchDetonator());
+    document.getElementById('btn-randomize').addEventListener('click', () => engine.triggerEntropyOverdrive());
+
+    // Presets
+    document.getElementById('btn-preset-cyber').addEventListener('click', () => {
+      engine.params.baseFreq = 110;
+      engine.params.filterCutoff = 2800;
+      engine.params.filterQ = 2.5;
+      engine.params.cyberHaze = 0.4;
+      engine.params.dystopianWarmth = 0.2;
+      engine.params.anomaly = 0.0;
+      engine.currentWaveform = 'sawtooth';
+      syncUIWithParams();
+      engine.updateParameters();
+    });
+
+    document.getElementById('btn-preset-dystopia').addEventListener('click', () => {
+      engine.params.baseFreq = 65;
+      engine.params.filterCutoff = 800;
+      engine.params.filterQ = 4.0;
+      engine.params.cyberHaze = 0.7;
+      engine.params.dystopianWarmth = 0.6;
+      engine.params.anomaly = 0.1;
+      engine.currentWaveform = 'square';
+      syncUIWithParams();
+      engine.updateParameters();
+    });
+
+    document.getElementById('btn-preset-glitch').addEventListener('click', () => {
+      engine.params.baseFreq = 220;
+      engine.params.filterCutoff = 5500;
+      engine.params.filterQ = 8.0;
+      engine.params.cyberHaze = 0.2;
+      engine.params.distortion = 0.6;
+      engine.params.anomaly = 0.45;
+      engine.currentWaveform = 'triangle';
+      syncUIWithParams();
+      engine.updateParameters();
+    });
+
+    // Synchronize UI Controls with Parameters Object
+    function syncUIWithParams() {
+      document.getElementById('param-base-freq').value = engine.params.baseFreq;
+      document.getElementById('val-base-freq').textContent = `${Math.round(engine.params.baseFreq)} Hz`;
+
+      document.getElementById('param-filter-cutoff').value = engine.params.filterCutoff;
+      document.getElementById('val-filter-cutoff').textContent = `${Math.round(engine.params.filterCutoff)} Hz`;
+
+      document.getElementById('param-filter-q').value = engine.params.filterQ;
+      document.getElementById('val-filter-q').textContent = parseFloat(engine.params.filterQ).toFixed(1);
+
+      document.getElementById('param-cyber-haze').value = engine.params.cyberHaze;
+      document.getElementById('val-cyber-haze').textContent = `${Math.round(engine.params.cyberHaze * 100)}%`;
+
+      document.getElementById('param-dystopian-warmth').value = engine.params.dystopianWarmth;
+      document.getElementById('val-dystopian-warmth').textContent = `${Math.round(engine.params.dystopianWarmth * 100)}%`;
+
+      document.getElementById('param-distortion').value = engine.params.distortion;
+      document.getElementById('val-distortion').textContent = `${Math.round(engine.params.distortion * 100)}%`;
+
+      document.getElementById('param-anomaly').value = engine.params.anomaly;
+      document.getElementById('val-anomaly').textContent = `${Math.round(engine.params.anomaly * 100)}%`;
+
+      initSequencerGridUI();
+    }
+
+    // 5. PSEUDO / PLACEBO KNOBS INTERACTION (Visual Polish Only)
+    function setupPlaceboKnob(knobId, pointerId, valId, unit = '%') {
+      const knob = document.getElementById(knobId);
+      const pointer = document.getElementById(pointerId);
+      const valDisplay = document.getElementById(valId);
+      let isDragging = false;
+
+      const updateKnob = (clientY) => {
+        let currentVal = parseInt(knob.dataset.value) || 50;
+        currentVal = Math.max(0, Math.min(100, currentVal - clientY));
+        knob.dataset.value = currentVal;
+        
+        // Rotate visual pointer from -135deg to +135deg
+        const deg = (currentVal / 100) * 270 - 135;
+        pointer.style.transform = `rotate(${deg}deg)`;
+        valDisplay.textContent = `${currentVal}${unit}`;
+      };
+
+      knob.addEventListener('mousedown', () => { isDragging = true; });
+      window.addEventListener('mouseup', () => { isDragging = false; });
+      window.addEventListener('mousemove', (e) => {
+        if (isDragging) updateKnob(e.movementY);
+      });
+
+      // Touch events support
+      let lastTouchY = 0;
+      knob.addEventListener('touchstart', (e) => {
+        isDragging = true;
+        lastTouchY = e.touches[0].clientY;
+      });
+      window.addEventListener('touchend', () => { isDragging = false; });
+      window.addEventListener('touchmove', (e) => {
+        if (isDragging) {
+          const deltaY = e.touches[0].clientY - lastTouchY;
+          lastTouchY = e.touches[0].clientY;
+          updateKnob(deltaY);
+        }
+      });
+    }
+
+    setupPlaceboKnob('knob-quantum', 'pointer-quantum', 'val-quantum', '%');
+    setupPlaceboKnob('knob-defrag', 'pointer-defrag', 'val-defrag', '%');
+    setupPlaceboKnob('knob-overclock', 'pointer-overclock', 'val-overclock', ' Ghz');
+
+    // 6. BUILD 16-STEP SEQUENCER UI GRID
+    function initSequencerGridUI() {
+      const grid = document.getElementById('sequencer-grid');
+      grid.innerHTML = '';
+
+      for (let i = 0; i < 16; i++) {
+        const col = document.createElement('div');
+        col.id = `seq-step-${i}`;
+        col.className = `flex flex-col items-center p-1.5 rounded border transition-all ${
+          engine.seqActive[i] 
+            ? 'bg-cyan-950/60 border-cyan-500/50' 
+            : 'bg-slate-900/40 border-slate-800'
+        }`;
+
+        col.innerHTML = `
+          <span class="text-[9px] text-slate-500 font-mono mb-1">#${i + 1}</span>
+          <!-- Step Trigger Toggle Switch -->
+          <button onclick="toggleSeqStep(${i})" class="w-full py-1 mb-1.5 text-[10px] font-bold rounded ${
+            engine.seqActive[i] ? 'bg-cyan-500 text-black shadow-[0_0_8px_#00f3ff]' : 'bg-slate-800 text-slate-500'
+          }">
+            ${engine.seqActive[i] ? 'ON' : 'OFF'}
+          </button>
+          <!-- Step Pitch Multiplier Range -->
+          <input type="range" min="0.5" max="2.5" step="0.05" value="${engine.seqPitches[i]}" 
+            oninput="updateSeqPitch(${i}, this.value)" 
+            class="w-full h-12 accent-pink-500" style="-webkit-appearance: slider-vertical;">
+          <span id="seq-val-${i}" class="text-[9px] text-pink-400 font-mono mt-1">${engine.seqPitches[i]}x</span>
+        `;
+
+        grid.appendChild(col);
+      }
+    }
+
+    window.toggleSeqStep = (idx) => {
+      engine.seqActive[idx] = !engine.seqActive[idx];
+      initSequencerGridUI();
+    };
+
+    window.updateSeqPitch = (idx, val) => {
+      engine.seqPitches[idx] = parseFloat(val);
+      document.getElementById(`seq-val-${idx}`).textContent = `${val}x`;
+    };
+
+    function updateSequencerUI(activeStep) {
+      for (let i = 0; i < 16; i++) {
+        const stepEl = document.getElementById(`seq-step-${i}`);
+        if (!stepEl) continue;
+
+        if (i === activeStep) {
+          stepEl.classList.add('border-yellow-400', 'shadow-[0_0_12px_#ffe600]');
+          stepEl.classList.remove('border-cyan-500/50', 'border-slate-800');
+        } else {
+          stepEl.classList.remove('border-yellow-400', 'shadow-[0_0_12px_#ffe600]');
+          if (engine.seqActive[i]) {
+            stepEl.classList.add('border-cyan-500/50');
+          } else {
+            stepEl.classList.add('border-slate-800');
+          }
+        }
+      }
+    }
+
+    // --- 7. DUAL HTML5 CANVAS VISUALIZERS ---
+    function initVisualizers() {
+      const scopeCanvas = document.getElementById('canvas-oscilloscope');
+      const spectrumCanvas = document.getElementById('canvas-spectrum');
+      const scopeCtx = scopeCanvas.getContext('2d');
+      const spectrumCtx = spectrumCanvas.getContext('2d');
+
+      // Resize canvas to match display size
+      const resizeCanvas = () => {
+        scopeCanvas.width = scopeCanvas.clientWidth * window.devicePixelRatio;
+        scopeCanvas.height = scopeCanvas.clientHeight * window.devicePixelRatio;
+        spectrumCanvas.width = spectrumCanvas.clientWidth * window.devicePixelRatio;
+        spectrumCanvas.height = spectrumCanvas.clientHeight * window.devicePixelRatio;
+      };
+      resizeCanvas();
+      window.addEventListener('resize', resizeCanvas);
+
+      const bufferLength = engine.analyserNode.frequencyBinCount;
+      const timeData = new Uint8Array(bufferLength);
+      const freqData = new Uint8Array(bufferLength);
+
+      let lastTime = performance.now();
+      let frameCount = 0;
+
+      function renderFrame(now) {
+        requestAnimationFrame(renderFrame);
+
+        // FPS Counter calculation
+        frameCount++;
+        if (now - lastTime >= 1000) {
+          document.getElementById('fps-counter').textContent = `${frameCount} FPS`;
+          frameCount = 0;
+          lastTime = now;
+        }
+
+        // --- 1. OSCILLOSCOPE DRAWING ---
+        engine.analyserNode.getByteTimeDomainData(timeData);
+        scopeCtx.fillStyle = '#05050a';
+        scopeCtx.fillRect(0, 0, scopeCanvas.width, scopeCanvas.height);
+
+        // Subtle Gridlines
+        scopeCtx.strokeStyle = 'rgba(0, 243, 255, 0.1)';
+        scopeCtx.lineWidth = 1;
+        scopeCtx.beginPath();
+        scopeCtx.moveTo(0, scopeCanvas.height / 2);
+        scopeCtx.lineTo(scopeCanvas.width, scopeCanvas.height / 2);
+        scopeCtx.stroke();
+
+        // Waveform Line
+        scopeCtx.lineWidth = 2 * window.devicePixelRatio;
+        scopeCtx.strokeStyle = '#00f3ff';
+        scopeCtx.shadowBlur = 10;
+        scopeCtx.shadowColor = '#00f3ff';
+        scopeCtx.beginPath();
+
+        const sliceWidth = scopeCanvas.width / bufferLength;
+        let x = 0;
+
+        for (let i = 0; i < bufferLength; i++) {
+          const v = timeData[i] / 128.0;
+          const y = (v * scopeCanvas.height) / 2;
+
+          if (i === 0) {
+            scopeCtx.moveTo(x, y);
+          } else {
+            scopeCtx.lineTo(x, y);
+          }
+          x += sliceWidth;
+        }
+        scopeCtx.lineTo(scopeCanvas.width, scopeCanvas.height / 2);
+        scopeCtx.stroke();
+        scopeCtx.shadowBlur = 0; // Reset glow
+
+        // --- 2. FREQUENCY SPECTRUM MATRIX DRAWING ---
+        engine.analyserNode.getByteFrequencyData(freqData);
+        spectrumCtx.fillStyle = '#05050a';
+        spectrumCtx.fillRect(0, 0, spectrumCanvas.width, spectrumCanvas.height);
+
+        const numBars = 48;
+        const barWidth = spectrumCanvas.width / numBars;
+
+        for (let i = 0; i < numBars; i++) {
+          // Average multiple bins for smooth visual display
+          const binIndex = Math.floor(i * (bufferLength / 128));
+          const barHeight = (freqData[binIndex] / 255) * spectrumCanvas.height;
+
+          // Cyberpunk Gradient Fill (Magenta to Acid Yellow)
+          const grad = spectrumCtx.createLinearGradient(0, spectrumCanvas.height, 0, 0);
+          grad.addColorStop(0, '#ff0055');
+          grad.addColorStop(0.7, '#ffe600');
+          grad.addColorStop(1, '#00f3ff');
+
+          spectrumCtx.fillStyle = grad;
+          spectrumCtx.fillRect(
+            i * barWidth + 1,
+            spectrumCanvas.height - barHeight,
+            barWidth - 2,
+            barHeight
+          );
+        }
+      }
+
+      requestAnimationFrame(renderFrame);
+    }
+  </script>
+</body>
+</html>
