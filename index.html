@@ -53,6 +53,19 @@
         </div>
       </div>
 
+      <div class="chart-panel">
+        <div class="chart-header">
+          <span>Preisverlauf</span>
+          <span id="chart-symbol-label">ALPHA</span>
+        </div>
+        <svg id="price-chart" viewBox="0 0 320 120" preserveAspectRatio="none" aria-label="Preisverlauf">
+          <polygon id="chart-fill" points=""></polygon>
+          <polyline id="chart-line" points=""></polyline>
+        </svg>
+      </div>
+
+      <div id="ticker-bricks" class="brick-grid" aria-live="polite"></div>
+
       <div class="trade-controls">
         <label>
           Aktie
@@ -61,6 +74,7 @@
             <option value="BETA">BETA</option>
             <option value="GAMMA">GAMMA</option>
             <option value="DELTA">DELTA</option>
+            <option value="BEN">BEN</option>
           </select>
         </label>
 
