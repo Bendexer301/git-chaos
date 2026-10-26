@@ -40,3 +40,10 @@ document.getElementById("quote-btn").addEventListener("click", () => {
   const random = quotes[Math.floor(Math.random() * quotes.length)];
   document.getElementById("quote").textContent = random;
 });
+
+// ---------- Geheimnis ----------
+const secretBtn = document.getElementById("secret-btn");
+
+secretBtn.addEventListener("click", () => {
+  window.open("https://www.youtube.com/watch?v=dQw4w9WgXcQ", "_blank", "noopener,noreferrer");
+});
