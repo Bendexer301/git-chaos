@@ -45,6 +45,7 @@ document.getElementById("quote-btn").addEventListener("click", () => {
   document.getElementById("quote").textContent = random;
 });
 
+<<<<<<< HEAD
 
 // Wir lauschen auf Veränderungen des Zustands
 toggleCheckbox.addEventListener('change', function() {
@@ -56,3 +57,11 @@ toggleCheckbox.addEventListener('change', function() {
     transElement.style.backgroundImage = 'none';
   }
 });
+=======
+// ---------- Geheimnis ----------
+const secretBtn = document.getElementById("secret-btn");
+
+secretBtn.addEventListener("click", () => {
+  window.open("https://www.youtube.com/watch?v=dQw4w9WgXcQ", "_blank", "noopener,noreferrer");
+});
+>>>>>>> bf18e4b80335f5f7457c167b28ac8a05700ddb21
