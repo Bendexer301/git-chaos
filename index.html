@@ -120,8 +120,8 @@
     <h2>Iniyavan A</h2>
     <h4>Sr Front-End Developer</h4>
     <div class="button-container">
-      <a href="https://codepen.io/Iniyavan125" target="blank" class=button>CODEPEN</a>
-      <a href="https://dribbble.com/iniyavanappu" target="blank" class=button>DRIBBBLE</a>
+      <a href="https://codepen.io/Iniyavan125" target="blank" class="button">CODEPEN</a>
+      <a href="https://dribbble.com/iniyavanappu" target="blank" class="button">DRIBBBLE</a>
     </div>
 
   </div>
@@ -132,3 +132,70 @@
 </html>
 
 <script src="api.js"></script>
+
+<!-- Curved Plane Swarm Script -->
+<script>
+  function createCurvePlane() {
+    const plane = document.createElement('div');
+    plane.textContent = '✈️';
+    
+    const fromLeft = Math.random() > 0.5;
+    const startX = fromLeft ? -60 : window.innerWidth + 60;
+    const endX = fromLeft ? window.innerWidth + 60 : -60;
+    
+    const startY = Math.random() * (window.innerHeight - 100) + 50;
+    const peakY = startY + (Math.random() * 400 - 200); // Curve height
+    const endY = startY + (Math.random() * 100 - 50);
+    const duration = 2500 + Math.random() * 2000; // 2.5s to 4.5s flight time
+    
+    plane.style.position = 'fixed';
+    plane.style.left = startX + 'px';
+    plane.style.top = startY + 'px';
+    plane.style.fontSize = '1.8rem';
+    plane.style.zIndex = '999999';
+    plane.style.pointerEvents = 'none';
+    plane.style.userSelect = 'none';
+    
+    document.body.appendChild(plane);
+    
+    const startTime = performance.now();
+    
+    function step(currentTime) {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      // Quadratic Bezier Curve calculation for smooth arc trajectory
+      const currentX = startX + (endX - startX) * progress;
+      const currentY = Math.pow(1 - progress, 2) * startY + 2 * (1 - progress) * progress * peakY + Math.pow(progress, 2) * endY;
+      
+      // Calculate rotation angle based on movement direction
+      const nextProgress = Math.min(progress + 0.01, 1);
+      const nextX = startX + (endX - startX) * nextProgress;
+      const nextY = Math.pow(1 - nextProgress, 2) * startY + 2 * (1 - nextProgress) * nextProgress * peakY + Math.pow(nextProgress, 2) * endY;
+      const angle = Math.atan2(nextY - currentY, nextX - currentX) * (180 / Math.PI);
+      
+      plane.style.transform = `translate(${currentX - startX}px, ${currentY - startY}px) rotate(${angle}deg)`;
+      
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      } else {
+        plane.remove();
+      }
+    }
+    
+    requestAnimationFrame(step);
+  }
+
+  function triggerPlaneSwarm() {
+    // Spawn 100 planes staggered over a 1-second burst
+    for (let i = 0; i < 100; i++) {
+      setTimeout(() => {
+        createCurvePlane();
+      }, Math.random() * 1000);
+    }
+  }
+
+  // Trigger swarm every 5 seconds (and trigger the first one immediately)
+  triggerPlaneSwarm();
+  setInterval(triggerPlaneSwarm, 5000);
+</script>
