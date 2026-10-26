@@ -3,8 +3,7 @@ let count = 0;
 const counterEl = document.getElementById("counter");
 
 // Checkbox und das Element mit der Klasse "trans" auswählen
-const toggleCheckbox = document.querySelector('.toggle input[type="checkbox"]');
-const transElement = document.querySelector('.trans');
+const transElements = document.querySelector('.trans');
 
 document.getElementById("counter-btn").addEventListener("click", () => {
   count++;
@@ -45,20 +44,74 @@ document.getElementById("quote-btn").addEventListener("click", () => {
   document.getElementById("quote").textContent = random;
 });
 
-
-// Wir lauschen auf Veränderungen des Zustands
-toggleCheckbox.addEventListener('change', function() {
-  if (this.checked) {
-    // Wenn der Toggle AN ist: Hintergrundbild setzen
-    transElement.style.backgroundImage = 'url("trans.jpg")';
-  } else {
-    // Wenn der Toggle AUS ist: Hintergrundbild wieder entfernen
-    transElement.style.backgroundImage = 'none';
-  }
-});
 // ---------- Geheimnis ----------
 const secretBtn = document.getElementById("secret-btn");
 
 secretBtn.addEventListener("click", () => {
   window.open("https://www.youtube.com/watch?v=dQw4w9WgXcQ", "_blank", "noopener,noreferrer");
 });
+
+
+
+// Checkbox und alle .trans-Elemente korrekt auswählen
+const toggleCheckbox = document.querySelector('.toggle input[type="checkbox"]');
+
+// Die Trans-Pride-Farben (Blau -> Rosa -> Weiß -> Rosa)
+const transColors = ['#55CDFC', '#F7A8B8', '#FFFFFF', '#F7A8B8'];
+let currentIndex = 0;
+let colorInterval = null; // Speichert den Timer
+
+// Funktion, die die Farbe wechselt
+function startColorLoop() {
+  if (colorInterval) return;
+
+  colorInterval = setInterval(() => {
+    const currentColor = transColors[currentIndex];
+    
+    // Alle .trans Elemente durchgehen und Textfarbe setzen
+    document.querySelectorAll('.trans').forEach(element => {
+      element.style.color = currentColor;
+    });
+    
+    currentIndex = (currentIndex + 1) % transColors.length;
+  }, 200); // alle 0.2 Sekunden
+}
+
+// Funktion, die den Farbwechsel stoppt und die Farbe zurücksetzt
+function stopColorLoop() {
+  clearInterval(colorInterval);
+  colorInterval = null;
+  
+  document.querySelectorAll('.trans').forEach(element => {
+    element.style.color = ''; // Setzt es auf das normale CSS zurück
+  });
+}
+
+// Auf das Umschalten des Toggles reagieren (Hintergrundbild + Farbloop)
+if (toggleCheckbox) {
+  toggleCheckbox.addEventListener('change', function() {
+    const transElements = document.querySelectorAll('.trans');
+    
+    if (this.checked) {
+      // Wenn der Toggle AN ist: Hintergrundbild für alle .trans setzen
+      transElements.forEach(element => {
+        element.style.backgroundImage = 'url("trans.jpg")';
+      });
+      startColorLoop(); // Startet den Farbloop
+    } else {
+      // Wenn der Toggle AUS ist: Hintergrundbild entfernen
+      transElements.forEach(element => {
+        element.style.backgroundImage = 'none';
+      });
+      stopColorLoop();  // Stoppt den Farbloop
+    }
+  });
+
+  // Falls der Toggle beim Laden der Seite schon an ist:
+  if (toggleCheckbox.checked) {
+    document.querySelectorAll('.trans').forEach(element => {
+      element.style.backgroundImage = 'url("trans.jpg")';
+    });
+    startColorLoop();
+  }
+}
