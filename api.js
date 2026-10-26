@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // 2. An die API senden
-    fetch("https://simonlovesplanes.de/ben/api.php", {
+    fetch("https://simonlovesplanes.de/api/ben/api.php", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
