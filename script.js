@@ -2,6 +2,10 @@
 let count = 0;
 const counterEl = document.getElementById("counter");
 
+// Checkbox und das Element mit der Klasse "trans" auswählen
+const toggleCheckbox = document.querySelector('.toggle input[type="checkbox"]');
+const transElement = document.querySelector('.trans');
+
 document.getElementById("counter-btn").addEventListener("click", () => {
   count++;
   counterEl.textContent = count;
@@ -41,6 +45,17 @@ document.getElementById("quote-btn").addEventListener("click", () => {
   document.getElementById("quote").textContent = random;
 });
 
+
+// Wir lauschen auf Veränderungen des Zustands
+toggleCheckbox.addEventListener('change', function() {
+  if (this.checked) {
+    // Wenn der Toggle AN ist: Hintergrundbild setzen
+    transElement.style.backgroundImage = 'url("trans.jpg")';
+  } else {
+    // Wenn der Toggle AUS ist: Hintergrundbild wieder entfernen
+    transElement.style.backgroundImage = 'none';
+  }
+});
 // ---------- Geheimnis ----------
 const secretBtn = document.getElementById("secret-btn");
 
