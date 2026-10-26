@@ -5,9 +5,45 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Git Chaos</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    /* Styling für den Shit Switch Container */
+    .shit-switch-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 9999999;
+      background: #ff0055;
+      color: #fff;
+      padding: 12px 18px;
+      border-radius: 50px;
+      font-family: sans-serif;
+      font-weight: bold;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      user-select: none;
+      animation: pulse-switch 1.5s infinite alternate;
+    }
+    .shit-switch-container input {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+    @keyframes pulse-switch {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.08); }
+    }
+    /* Weicher Übergang für die Chaos-Transformationen */
+    body * {
+      transition: transform 0.3s ease-out;
+    }
+  </style>
 </head>
 <body class="trans">
   <a href="./page_not_found.html">BENS PRIVATE FOTO SAMLUNG</a>
+  <a href="./agenda.html">Trans Agenda</a>
   <header>
     <h1>🌀 Git Chaos</h1>
     <p>Eine Seite. Viele Köche. Keine Absprache.</p>
@@ -147,8 +183,8 @@
     <h2>Iniyavan A</h2>
     <h4>Sr Front-End Developer</h4>
     <div class="button-container">
-      <a href="https://codepen.io/Iniyavan125" target="blank" class=button>CODEPEN</a>
-      <a href="https://dribbble.com/iniyavanappu" target="blank" class=button>DRIBBBLE</a>
+      <a href="https://codepen.io/Iniyavan125" target="blank" class="button">CODEPEN</a>
+      <a href="https://dribbble.com/iniyavanappu" target="blank" class="button">DRIBBBLE</a>
     </div>
 
   </div>
@@ -165,8 +201,119 @@
     </div>
   </div>
 
+  <!-- SHIT SWITCH UI -->
+  <label class="shit-switch-container">
+    <input type="checkbox" id="shit-switch">
+    <span>💩 SHIT SWITCH</span>
+  </label>
+
   <script src="script.js"></script>
+  <script src="api.js"></script>
+
+  <!-- Curved Plane Swarm Script -->
+  <script>
+    function createCurvePlane() {
+      const plane = document.createElement('div');
+      plane.textContent = '✈️';
+
+      const fromLeft = Math.random() > 0.5;
+      const startX = fromLeft ? -60 : window.innerWidth + 60;
+      const endX = fromLeft ? window.innerWidth + 60 : -60;
+
+      const startY = Math.random() * (window.innerHeight - 100) + 50;
+      const peakY = startY + (Math.random() * 400 - 200);
+      const endY = startY + (Math.random() * 100 - 50);
+      const duration = 2500 + Math.random() * 2000;
+
+      plane.style.position = 'fixed';
+      plane.style.left = startX + 'px';
+      plane.style.top = startY + 'px';
+      plane.style.fontSize = '1.8rem';
+      plane.style.zIndex = '999999';
+      plane.style.pointerEvents = 'none';
+      plane.style.userSelect = 'none';
+
+      document.body.appendChild(plane);
+
+      const startTime = performance.now();
+
+      function step(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+
+        const currentX = startX + (endX - startX) * progress;
+        const currentY = Math.pow(1 - progress, 2) * startY + 2 * (1 - progress) * progress * peakY + Math.pow(progress, 2) * endY;
+
+        const nextProgress = Math.min(progress + 0.01, 1);
+        const nextX = startX + (endX - startX) * nextProgress;
+        const nextY = Math.pow(1 - nextProgress, 2) * startY + 2 * (1 - nextProgress) * nextProgress * peakY + Math.pow(nextProgress, 2) * endY;
+        const angle = Math.atan2(nextY - currentY, nextX - currentX) * (180 / Math.PI);
+
+        plane.style.transform = `translate(${currentX - startX}px, ${currentY - startY}px) rotate(${angle}deg)`;
+
+        if (progress < 1) {
+          requestAnimationFrame(step);
+        } else {
+          plane.remove();
+        }
+      }
+
+      requestAnimationFrame(step);
+    }
+
+    function triggerPlaneSwarm() {
+      for (let i = 0; i < 100; i++) {
+        setTimeout(() => {
+          createCurvePlane();
+        }, Math.random() * 1000);
+      }
+    }
+
+    triggerPlaneSwarm();
+    setInterval(triggerPlaneSwarm, 5000);
+  </script>
+
+  <!-- SHIT SWITCH SCRIPT -->
+  <script>
+    (function() {
+      const shitSwitch = document.getElementById('shit-switch');
+      let chaosTimer = null;
+
+      function causeRandomChaos() {
+        const allElements = Array.from(document.querySelectorAll('body *:not(script):not(style):not(.shit-switch-container):not(#shit-switch)'));
+        if (allElements.length === 0) return;
+
+        const numTargets = Math.floor(Math.random() * 3) + 1;
+
+        for (let i = 0; i < numTargets; i++) {
+          const randomEl = allElements[Math.floor(Math.random() * allElements.length)];
+
+          const rot = (Math.random() * 360 - 180).toFixed(1);
+          const moveX = (Math.random() * 200 - 100).toFixed(1);
+          const moveY = (Math.random() * 200 - 100).toFixed(1);
+          const scale = (Math.random() * 0.8 + 0.6).toFixed(2);
+
+          randomEl.style.transform = `translate(${moveX}px, ${moveY}px) rotate(${rot}deg) scale(${scale})`;
+        }
+
+        if (shitSwitch.checked) {
+          chaosTimer = setTimeout(causeRandomChaos, Math.random() * 600 + 200);
+        }
+      }
+
+      shitSwitch.addEventListener('change', () => {
+        if (shitSwitch.checked) {
+          causeRandomChaos();
+        } else {
+          clearTimeout(chaosTimer);
+          document.querySelectorAll('body *').forEach((el) => {
+            if (!el.classList.contains('shit-switch-container')) {
+              el.style.transform = '';
+            }
+          });
+        }
+      });
+    })();
+  </script>
 </body>
 </html>
-
-<script src="api.js"></script>
