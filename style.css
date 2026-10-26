@@ -20,6 +20,19 @@ header h1 {
   margin: 0;
   font-size: 2.5rem;
 }
+.card {
+  height: auto;
+  max-width: 350px;
+  width: 90vw;
+  background: var(--secondary-bg);
+  border-radius: 10px;
+  -webkit-box-shadow: 0 5px 15px rgba(50, 50, 50, 0.1);
+  box-shadow: 0 5px 15px rgba(50, 50, 50, 0.1);
+  text-align: center;
+  font-weight: 600;
+  padding: 50px 20px 40px;
+  position: relative;
+}
 
 main {
   display: grid;
