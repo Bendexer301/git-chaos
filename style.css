@@ -95,9 +95,95 @@ button:hover {
   cursor: pointer;
 }
 
-#todo-list li.done {
-  text-decoration: line-through;
-  color: #999;
+.trading-card {
+  background: linear-gradient(135deg, #ffffff, #f7f4ff);
+}
+
+.market-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.market-label {
+  margin: 0 0 0.25rem;
+  color: #666;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.market-price {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.trade-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.trade-controls label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.trade-controls select,
+.trade-controls input {
+  padding: 0.7rem 0.75rem;
+  border: 1px solid #d5d7db;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.trade-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.buy-btn,
+.sell-btn {
+  flex: 1;
+}
+
+.buy-btn {
+  background: #22c55e;
+}
+
+.buy-btn:hover {
+  background: #16a34a;
+}
+
+.sell-btn {
+  background: #ef4444;
+}
+
+.sell-btn:hover {
+  background: #dc2626;
+}
+
+.trade-message {
+  margin: 0 0 0.75rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.portfolio-list {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.portfolio-list li {
+  margin-bottom: 0.4rem;
 }
 
 footer {

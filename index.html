@@ -37,6 +37,48 @@
       <p id="quote">„Funktioniert auf meinem Rechner.“</p>
       <button id="quote-btn">Neuer Spruch</button>
     </section>
+
+    <!-- Trading Simulator -->
+    <section class="card trading-card">
+      <h2>Trading Simulator</h2>
+
+      <div class="market-row">
+        <div>
+          <p class="market-label">Aktueller Preis</p>
+          <p id="market-price" class="market-price">€ 0.00</p>
+        </div>
+        <div>
+          <p class="market-label">Gesamtwert</p>
+          <p id="portfolio-value" class="market-price">€ 10.000,00</p>
+        </div>
+      </div>
+
+      <div class="trade-controls">
+        <label>
+          Aktie
+          <select id="trade-symbol">
+            <option value="ALPHA">ALPHA</option>
+            <option value="BETA">BETA</option>
+            <option value="GAMMA">GAMMA</option>
+            <option value="DELTA">DELTA</option>
+          </select>
+        </label>
+
+        <label>
+          Menge
+          <input id="trade-amount" type="number" min="1" value="1" />
+        </label>
+      </div>
+
+      <div class="trade-actions">
+        <button id="buy-btn" type="button" class="buy-btn">Kaufen</button>
+        <button id="sell-btn" type="button" class="sell-btn">Verkaufen</button>
+      </div>
+
+      <p id="trade-message" class="trade-message">Guthaben: € 10.000,00</p>
+
+      <ul id="portfolio-list" class="portfolio-list"></ul>
+    </section>
   </main>
 
   <footer>
@@ -57,22 +99,7 @@
   </div>
   <iframe src="ad_banner_widget.html" width="100%" height="340" frameborder="0" scrolling="no" style="border:none; overflow:hidden;"></iframe>
 
-<<<<<<< Updated upstream
-  <div class="card" style="z-index: 100000;">
-    <span class="bg-theme"></span>
-    <img src="https://assets.codepen.io/6954883/internal/avatars/users/default.png?fit=crop&format=auto&height=512&version=1632299382&width=512" alt="prof_image">
-    <h2>Iniyavan A</h2>
-    <h4>Sr Front-End Developer</h4>
-    <div class="button-container">
-      <a href="https://codepen.io/Iniyavan125" target="blank" class=button>CODEPEN</a>
-      <a href="https://dribbble.com/iniyavanappu" target="blank" class=button>DRIBBBLE</a>
-    </div>
-
-  </div>
-  <button id="secret-btn" aria-label="Geheimer Button" title="impressum"></button>
-=======
-  <button id="secret-btn" type="button" aria-label="Rickroll" title="Rickroll">🌀</button>
->>>>>>> Stashed changes
+  <button id="secret-btn" type="button" aria-label="Rickroll" title="Rickroll">🎵</button>
 
   <script src="script.js"></script>
 </body>
