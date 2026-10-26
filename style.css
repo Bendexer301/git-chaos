@@ -94,9 +94,186 @@ button:hover {
   cursor: pointer;
 }
 
-#todo-list li.done {
-  text-decoration: line-through;
-  color: #999;
+.trading-card {
+  background: linear-gradient(135deg, #ffffff, #f7f4ff);
+}
+
+.market-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.market-label {
+  margin: 0 0 0.25rem;
+  color: #666;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.market-price {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.chart-panel {
+  padding: 0.9rem;
+  margin-bottom: 1rem;
+  background: linear-gradient(180deg, rgba(124, 58, 237, 0.08), rgba(59, 130, 246, 0.04));
+  border: 1px solid rgba(124, 58, 237, 0.2);
+  border-radius: 12px;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #4b5563;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+#price-chart {
+  width: 100%;
+  height: 130px;
+  display: block;
+  background: rgba(255, 255, 255, 0.55);
+  border-radius: 10px;
+}
+
+#chart-fill {
+  fill: rgba(124, 58, 237, 0.18);
+}
+
+#chart-line {
+  fill: none;
+  stroke: #7c3aed;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.brick-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+  margin-bottom: 1rem;
+}
+
+.brick {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.75rem 0.65rem;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #f5f3ff, #eef2ff);
+  border: 1px solid rgba(120, 119, 198, 0.2);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.7), 0 4px 8px rgba(15, 23, 42, 0.06);
+}
+
+.brick::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.35), transparent 40%);
+  pointer-events: none;
+}
+
+.brick-name {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #4b5563;
+}
+
+.brick strong {
+  font-size: 0.9rem;
+  color: #111827;
+}
+
+.brick.up {
+  border-color: rgba(34, 197, 94, 0.25);
+  background: linear-gradient(135deg, #ecfdf5, #f0fdf4);
+}
+
+.brick.down {
+  border-color: rgba(239, 68, 68, 0.2);
+  background: linear-gradient(135deg, #fff1f2, #fef2f2);
+}
+
+.trade-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.trade-controls label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.trade-controls select,
+.trade-controls input {
+  padding: 0.7rem 0.75rem;
+  border: 1px solid #d5d7db;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.trade-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.buy-btn,
+.sell-btn {
+  flex: 1;
+}
+
+.buy-btn {
+  background: #22c55e;
+}
+
+.buy-btn:hover {
+  background: #16a34a;
+}
+
+.sell-btn {
+  background: #ef4444;
+}
+
+.sell-btn:hover {
+  background: #dc2626;
+}
+
+.trade-message {
+  margin: 0 0 0.75rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.portfolio-list {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.portfolio-list li {
+  margin-bottom: 0.4rem;
 }
 
 footer {
@@ -107,25 +284,30 @@ footer {
 
 #secret-btn {
   position: fixed;
-  right: 12px;
-  bottom: 12px;
-  width: 18px;
-  height: 18px;
+  right: 18px;
+  bottom: 18px;
+  width: 54px;
+  height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border: none;
-  border-radius: 50%;
-  background: transparent;
-  opacity: 0.04;
+  border-radius: 14px;
+  background: rgba(255, 107, 53, 0.18);
+  color: #111;
+  font-size: 2rem;
+  line-height: 1;
   cursor: pointer;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  transition: transform 0.2s ease, background 0.2s ease;
   z-index: 1000;
 }
 
 #secret-btn:hover,
 #secret-btn:focus-visible {
-  opacity: 0.18;
-  background: rgba(0, 0, 0, 0.08);
+  background: rgba(255, 107, 53, 0.28);
   outline: none;
-  transform: scale(1.2);
+  transform: translateY(-1px) scale(1.05);
 }
 .trans {
   /* lass dat mal stehen */

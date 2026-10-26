@@ -42,15 +42,12 @@ Jemand war schneller. Erst `git pull`, dann nochmal `git push`.
 
 Git zeigt in der Datei sowas an:
 
-```
-<<<<<<< HEAD
+```text
 deine Version
-=======
 die Version der anderen
->>>>>>> abc123
 ```
 
-Entscheide, was bleiben soll, lösch die Markierungen (`<<<<<<<`, `=======`, `>>>>>>>`), dann:
+Entscheide, was bleiben soll, lösche die Markierungen (`<<<<<<<`, `=======`, `>>>>>>>`), dann:
 
 ```bash
 git add .
